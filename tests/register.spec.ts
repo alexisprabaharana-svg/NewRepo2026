@@ -1,8 +1,12 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+import { RegisterPage } from '../pages/registerPage';
 
 test('Fill registration form with Kiran details', async ({ page }) => {
+  // Initialize RegisterPage POM
+  const registerPage = new RegisterPage(page);
+
   // Read data from JSON file
   const dataPath = path.join(__dirname, '../data/register_data.json');
   const rawData = fs.readFileSync(dataPath, 'utf-8');
@@ -16,48 +20,17 @@ test('Fill registration form with Kiran details', async ({ page }) => {
   }
 
   // Navigate to registration page
-  await page.goto('https://demo.automationtesting.in/Register.html');
+  await registerPage.navigateToRegisterPage();
 
-  // Wait for page to load
-  await page.waitForLoadState('domcontentloaded');
-  
-  // Wait for form to be visible
-  await page.waitForSelector('form', { timeout: 10000 });
+  // Fill registration form with Kiran's details
+  await registerPage.fillFirstName(kiranData.name);
+  await registerPage.fillLastName(kiranData.name);
+  await registerPage.fillEmail(kiranData.email);
+  await registerPage.fillPhone(kiranData.phone);
 
-  // Fill First Name - using different selector approaches
-  const firstNameInput = page.locator('input[ng-model="FirstName"]');
-  if (await firstNameInput.isVisible()) {
-    await firstNameInput.fill(kiranData.name);
-    console.log('✅ Filled First Name: ' + kiranData.name);
-  }
-
-  // Fill Last Name (if available)
-  const lastNameInput = page.locator('input[ng-model="LastName"]');
-  if (await lastNameInput.isVisible()) {
-    await lastNameInput.fill(kiranData.name);
-    console.log('✅ Filled Last Name: ' + kiranData.name);
-  }
-
-  // Fill Email - try multiple selectors
-  const emailInputs = [
-    page.locator('input[ng-model="EmailAdress"]'),
-    page.locator('input[placeholder*="mail"]'),
-    page.locator('input[type="email"]')
-  ];
-  
-  for (const emailInput of emailInputs) {
-    if (await emailInput.isVisible()) {
-      await emailInput.fill(kiranData.email);
-      console.log('✅ Filled Email: ' + kiranData.email);
-      break;
-    }
-  }
-
-  // Fill Phone
-  const phoneInput = page.locator('input[ng-model="Phone"]');
-  if (await phoneInput.isVisible()) {
-    await phoneInput.fill(kiranData.phone);
-    console.log('✅ Filled Phone: ' + kiranData.phone);
+  // Fill optional address if available
+  if (kiranData.address) {
+    await registerPage.fillAddress(kiranData.address);
   }
 
   // Small delay to ensure fields are filled
@@ -69,10 +42,8 @@ test('Fill registration form with Kiran details', async ({ page }) => {
     fs.mkdirSync(screenshotsDir, { recursive: true });
   }
 
-  // Take full page screenshot
-  const screenshotPath = path.join(screenshotsDir, `registration_form_${Date.now()}.png`);
-  await page.screenshot({ path: screenshotPath, fullPage: true });
-  console.log('✅ Screenshot taken and saved to: ' + screenshotPath);
+  // Take full page screenshot using POM method
+  await registerPage.takeFormScreenshot(`registration_form_${Date.now()}.png`);
 
   console.log('✅ Registration form filled with Kiran details');
   console.log('✅ Form NOT submitted as requested');
