@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "name": "Kiran",
+      "email": "kiran@example.com",
+      "phone": "9876543210",
+      "address": "123 Main Street",
+      "city": "Bangalore",
+      "state": "Karnataka",
+      "postalCode": "560001",
+      "country": "India"
+    }
+  ]
+}
